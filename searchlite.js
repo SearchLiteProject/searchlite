@@ -63,6 +63,7 @@ const ensDocSql = `
     body = excluded.body
   ;
 `
+const delDocSql = `DELETE FROM doc WHERE dataset = ? AND location = ?`
 const searchSql = `
   SELECT
     doc.id,
@@ -104,6 +105,7 @@ export default class SearchLite {
     this.insDocStmt = this.db.prepare(insDocSql)
     this.updDocStmt = this.db.prepare(updDocSql)
     this.ensDocStmt = this.db.prepare(ensDocSql)
+    this.delDocStmt = this.db.prepare(delDocSql)
     this.searchStmt  = this.db.prepare(searchSql)
   }
 
@@ -140,6 +142,12 @@ export default class SearchLite {
     const info = this.ensDocStmt.run(dataset, location, title, body)
     this.log('ens()', 'info', info)
     return info.lastInsertRowid
+  }
+
+  del(dataset, location) {
+    const info = this.delDocStmt.run(dataset, location)
+    this.log('del()', 'info', info)
+    return Boolean(info.changes)
   }
 
   search(dataset, query) {

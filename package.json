@@ -6,7 +6,7 @@
   "type": "module",
   "main": "searchlite.js",
   "scripts": {
-    "test": "tape test.js"
+    "test": "tape test/*.js"
   },
   "devDependencies": {
     "better-sqlite3": "^8.1.0",
