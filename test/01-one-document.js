@@ -1,22 +1,10 @@
-// node
-import fs from 'node:fs'
-// npm
-import test from 'tape'
-import Sqlite from 'better-sqlite3'
-
 // local
-import SearchLite from '../searchlite.js'
+import setup from './util/setup.js'
 
-//
-const filename = '/tmp/' + Date.now() + '.db'
-const db = Sqlite(filename)
-const sl = new SearchLite(db)
+// setup
+const { test, filename, db, sl } = setup()
 
-test.onFinish(() => {
-  db.close()
-  fs.unlinkSync(filename)
-})
-
+// tests
 test('small document inserts - tweets', t => {
   t.plan(3)
 
