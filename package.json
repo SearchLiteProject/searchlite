@@ -1,0 +1,30 @@
+{
+  "name": "searchlite",
+  "title": "SearchLite",
+  "description": "Provides search index functionality.",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "searchlite.js",
+  "scripts": {
+    "test": "tape test.js"
+  },
+  "devDependencies": {
+    "better-sqlite3": "^8.1.0",
+    "tape": "^5.6.3"
+  },
+  "homepage": "https://github.com/SearchLiteProject/searchlite#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SearchLiteProject/searchlite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SearchLiteProject/searchlite/issues"
+  },
+  "author": "Andrew Chilton",
+  "keywords": [
+    "search",
+    "index",
+    "sqlite"
+  ],
+  "license": "MIT"
+}

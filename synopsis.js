@@ -1,36 +1,6 @@
-# SearchLite
-
-The backend library which takes an instance of a SQLite DB and provides you
-with the ability to insert/update documents, plus search over them.
-
-## About
-
-1. insert a doc (or more) into the search index
-  a. `dataset` so you can index recipes, a website, enron, whatever
-  b. `location` such as `https://example.com` or `file://path/to/filename.txt`
-    or `id-123` ... must be unique per `dataset`
-  c. `title` such as "Unique Rocky Road"
-  d. `body` such as the recipe itself
-2. uses a table called `doc` for the above document with those fields
-3. interal: uses a Sqlite FTS5 virtual table called `ftsi` (for Full Text
-   Search Index)
-4. when searching, orders the results using BM25 where the weightings are:
-  a. `title` = 5
-  b. `body` = 3
-  c. `location` = 1
-
-That's it really! Any questions?
-
-## Synopsis
-
-Firstly, you'll need `better-sqlite3` since you need to create a DB instance of
-it to pass to us. Why? So that we don't take over your database and you can
-still use it in whatever way you need. i.e. This search functionality is
-additional to your DB.
-
-```js
+// npm
 import Sqlite from 'better-sqlite3'
-import SearchLite from '@searchlite/searchlite'
+import SearchLite from './searchlite.js'
 
 // create your own DB
 const db = Sqlite('tmp/synopsis.db')
@@ -79,10 +49,3 @@ console.log()
 
 console.log('recipe / beef:', sl.search('recipe', 'beef'))
 console.log()
-```
-
-# License
-
-MIT - https://chilts.mit-license.org/2023
-
-(Ends)
