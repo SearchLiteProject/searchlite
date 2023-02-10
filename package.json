@@ -1,5 +1,5 @@
 {
-  "name": "searchlite",
+  "name": "@searchlite/searchlite",
   "title": "SearchLite",
   "description": "Provides search index functionality.",
   "version": "0.1.0",
