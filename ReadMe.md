@@ -11,10 +11,10 @@ with the ability to insert/update documents and search over them.
     or `id-123` ... must be unique per `dataset`
   - `title` such as "Unique Rocky Road"
   - `body` such as the recipe itself
-1. uses a table called `doc` for the above document with those fields
-1. interal: uses a Sqlite FTS5 virtual table called `ftsi` (for Full Text
+2. uses a table called `doc` for the above document with those fields
+3. interal: uses a Sqlite FTS5 virtual table called `ftsi` (for Full Text
    Search Index)
-1. when searching, orders the results using BM25 where the weightings are:
+4. when searching, orders the results using BM25 where the weightings are:
   - `title` = 5
   - `body` = 3
   - `location` = 1
