@@ -1,23 +1,23 @@
 # SearchLite
 
 The backend library which takes an instance of a SQLite DB and provides you
-with the ability to insert/update documents, plus search over them.
+with the ability to insert/update documents and search over them.
 
 ## About
 
-1. insert a doc (or more) into the search index
-  a. `dataset` so you can index recipes, a website, enron, whatever
-  b. `location` such as `https://example.com` or `file://path/to/filename.txt`
+1. insert a number of documents into the search index
+  1. `dataset` so you can index recipes, a website, enron, whatever
+  1. `location` such as `https://example.com` or `file://path/to/filename.txt`
     or `id-123` ... must be unique per `dataset`
-  c. `title` such as "Unique Rocky Road"
-  d. `body` such as the recipe itself
-2. uses a table called `doc` for the above document with those fields
-3. interal: uses a Sqlite FTS5 virtual table called `ftsi` (for Full Text
+  1. `title` such as "Unique Rocky Road"
+  1. `body` such as the recipe itself
+1. uses a table called `doc` for the above document with those fields
+1. interal: uses a Sqlite FTS5 virtual table called `ftsi` (for Full Text
    Search Index)
-4. when searching, orders the results using BM25 where the weightings are:
-  a. `title` = 5
-  b. `body` = 3
-  c. `location` = 1
+1. when searching, orders the results using BM25 where the weightings are:
+  1. `title` = 5
+  1. `body` = 3
+  1. `location` = 1
 
 That's it really! Any questions?
 
@@ -80,6 +80,21 @@ console.log()
 console.log('recipe / beef:', sl.search('recipe', 'beef'))
 console.log()
 ```
+
+## Roadmap
+
+* ability to add "terms" (i.e. key=value pairs) to each document. e.g. if you
+  were indexing an "email", you might have "from=bob@example.com" or multiple
+  "to=jane@example.com" and "to=dora@example.com". This allows you query on
+  such terms as well, such as "all emails from bob@example.com"
+
+* ability to add range values such as "quantity=26", "height=176" or
+  "created=2023-02-10T01:26:33.554Z", so you can filter for such things as
+  "created between 1 Jan 2022 and 31 Dec 2022"
+
+## Releases / Changelog
+
+* currently working on v0.1.0 leading to v1.0.0
 
 # License
 
