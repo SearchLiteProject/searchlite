@@ -6,18 +6,18 @@ with the ability to insert/update documents and search over them.
 ## About
 
 1. insert a number of documents into the search index
-  1. `dataset` so you can index recipes, a website, enron, whatever
-  1. `location` such as `https://example.com` or `file://path/to/filename.txt`
+  - `dataset` so you can index recipes, a website, enron, whatever
+  - `location` such as `https://example.com` or `file://path/to/filename.txt`
     or `id-123` ... must be unique per `dataset`
-  1. `title` such as "Unique Rocky Road"
-  1. `body` such as the recipe itself
+  - `title` such as "Unique Rocky Road"
+  - `body` such as the recipe itself
 1. uses a table called `doc` for the above document with those fields
 1. interal: uses a Sqlite FTS5 virtual table called `ftsi` (for Full Text
    Search Index)
 1. when searching, orders the results using BM25 where the weightings are:
-  1. `title` = 5
-  1. `body` = 3
-  1. `location` = 1
+  - `title` = 5
+  - `body` = 3
+  - `location` = 1
 
 That's it really! Any questions?
 
