@@ -19,6 +19,9 @@ const ddlSql = `
       title TEXT NOT NULL,
       body TEXT NOT NULL,
       location TEXT NOT NULL,
+      updates INTEGER NOT NULL DEFAULT 1,
+      inserted DATETIME NOT NULL,
+      updated DATETIME NOT NULL,
 
       UNIQUE(dataset, location)
     )
@@ -51,16 +54,18 @@ const ddlSql = `
   END;
 `
 const getDocSql = `SELECT * FROM doc WHERE dataset = ? AND location = ?`
-const insDocSql = `INSERT INTO doc(dataset, location, title, body) VALUES(?, ?, ?, ?)`
-const updDocSql = `UPDATE doc SET title = ?, body = ? WHERE dataset = ? AND location = ?`
+const insDocSql = `INSERT INTO doc(dataset, location, title, body, updates, inserted, updated) VALUES(?, ?, ?, ?, 1, strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now'))`
+const updDocSql = `UPDATE doc SET title = ?, body = ?, updates = updates + 1, updated = strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now') WHERE dataset = ? AND location = ?`
 const ensDocSql = `
   INSERT INTO
-    doc(dataset, location, title, body)
+    doc(dataset, location, title, body, updates, inserted, updated)
   VALUES
-    (?, ?, ?, ?)
+    (?, ?, ?, ?, 1, strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now'))
   ON CONFLICT(dataset, location) DO UPDATE SET
     title = excluded.title,
-    body = excluded.body
+    body = excluded.body,
+    updates = updates + 1,
+    updated = strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now')
   ;
 `
 const delDocSql = `DELETE FROM doc WHERE dataset = ? AND location = ?`
@@ -134,7 +139,7 @@ export default class SearchLite {
   upd(dataset, location, title, body) {
     const info = this.updDocStmt.run(title, body, dataset, location)
     this.log('upd()', 'info', info)
-    return info.changes
+    return Boolean(info.changes)
   }
 
   // tries an insert but if it fails on `(dataset, location)` constraint, updates `title` and `body` instead
@@ -157,5 +162,9 @@ export default class SearchLite {
     const results = this.searchStmt.all(dataset, query)
     this.log(`search(${dataset}, ${query})`, 'results', results)
     return results
+  }
+
+  count(dataset) {
+    // ToDo! total number of docs in this dataset
   }
 }
