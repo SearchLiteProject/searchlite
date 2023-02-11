@@ -1,7 +1,29 @@
+<p align="center">
+  <img src="searchlite.svg" width="200px" align="center" alt="SearchLite logo" />
+  <h1 align="center">SearchLite</h1>
+  <p align="center">
+    <a href="https://searchlite.org">https://searchlite.org</a>
+    <br/>
+    An easy to use search implementation using SQLite's `FTS5()` extension.
+  </p>
+</p>
+
+<br/>
+<br/>
+
 # SearchLite
 
-The backend library which takes an instance of a SQLite DB and provides you
-with the ability to insert/update documents and search over them.
+A backend library for Node.js which uses SQLite (via
+[better-sqlite3](https://www.npmjs.com/package/better-sqlite3)) to provide you
+an easy to use interface to the FTS5 (Full Text Search) extension.
+
+ToDo: We also have a web server with an API and search UI at
+[SearchLite Server](https://www.npmjs.com/package/@searchlite/searchlite-server).
+
+ToDo: We also have some scripts which enable you to load documents locally at
+[SearchLite Utils](https://www.npmjs.com/package/@searchlite/searchlite-utils).
+
+Each of these projects use this SearchLite package.
 
 ## About
 
@@ -92,9 +114,17 @@ console.log()
   "created=2023-02-10T01:26:33.554Z", so you can filter for such things as
   "created between 1 Jan 2022 and 31 Dec 2022"
 
+* perhaps one day we allow for providing your own search fields instead of
+  using only "location", "title", "body. e.g. "title", "description",
+  "content", "profile", "whatever"
+
 ## Releases / Changelog
 
-* currently working on v0.1.0 leading to v1.0.0
+* v0.1.0 - first release
+  * creates the DB schema when instantiated with a `better-sqlite3` DB
+  * ins/upd/ens/del documents with "dataset", "location", "title", "body"
+  * count all docs in a dataset
+  * do a search (with weights) against "location", "title", "body"
 
 # License
 
