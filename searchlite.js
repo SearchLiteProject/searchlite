@@ -96,6 +96,7 @@ const searchSql = `
   ORDER BY
     relevance
 `
+const countDocsSql = `SELECT count(*) AS count FROM doc WHERE dataset = ?`
 
 export default class SearchLite {
   constructor(db, debug) {
@@ -112,6 +113,7 @@ export default class SearchLite {
     this.ensDocStmt = this.db.prepare(ensDocSql)
     this.delDocStmt = this.db.prepare(delDocSql)
     this.searchStmt  = this.db.prepare(searchSql)
+    this.countDocsStmt = this.db.prepare(countDocsSql)
   }
 
   log(fn, name, obj) {
@@ -165,6 +167,8 @@ export default class SearchLite {
   }
 
   count(dataset) {
-    // ToDo! total number of docs in this dataset
+    const row = this.countDocsStmt.get(dataset)
+    console.log('row:', row)
+    return row.count
   }
 }

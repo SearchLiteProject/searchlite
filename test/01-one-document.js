@@ -6,7 +6,10 @@ const { test, filename, db, sl } = setup()
 
 // tests
 test('small document inserts - tweets', t => {
-  t.plan(3)
+  t.plan(5)
+
+  const count1 = sl.count('tweet')
+  t.equal(count1, 0, "No tweets yet")
 
   const id1 = sl.ins('tweet', 'jack/20', '', 'just setting up my twttr')
   t.equal(id1, 1, 'inserted twttr')
@@ -14,6 +17,9 @@ test('small document inserts - tweets', t => {
   t.equal(id2, 2, 'inserted covfefe')
   const id3 = sl.ins('tweet', 'WarrenBuffett/329993701524918272', '', 'Warren is in the house.')
   t.equal(id3, 3, 'inserted house')
+
+  const count2 = sl.count('tweet')
+  t.equal(count2, 3, "Three tweets yet")
 
   t.end()
 })
@@ -108,6 +114,15 @@ test('delete a tweet', t => {
   // delete again
   const deleted2 = sl.del('tweet', 'WarrenBuffett/329993701524918272')
   t.deepEqual(deleted2, false, "Already deleted")
+
+  t.end()
+})
+
+test('count docs', t => {
+  t.plan(1)
+
+  const count = sl.count('tweet')
+  t.equal(count, 2, "Three tweets")
 
   t.end()
 })
