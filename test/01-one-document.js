@@ -5,7 +5,7 @@ import setup from './util/setup.js'
 const { test, filename, db, sl } = setup()
 
 // tests
-test('small document inserts - tweets', t => {
+test('01-one-document: small document inserts - tweets', t => {
   t.plan(5)
 
   const count1 = sl.count('tweet')
@@ -24,7 +24,7 @@ test('small document inserts - tweets', t => {
   t.end()
 })
 
-test('get a tweet', t => {
+test('01-one-document: get a tweet', t => {
   t.plan(1)
 
   const exp = {
@@ -33,6 +33,7 @@ test('get a tweet', t => {
     location: 'WarrenBuffett/329993701524918272',
     title: '',
     body: 'Warren is in the house.',
+    term: {},
     updates: 1,
   }
 
@@ -44,7 +45,7 @@ test('get a tweet', t => {
   t.end()
 })
 
-test('query tweets', t => {
+test('01-one-document: query tweets', t => {
   t.plan(1)
 
   const exp = [
@@ -54,6 +55,7 @@ test('query tweets', t => {
       location: 'WarrenBuffett/329993701524918272',
       title: '',
       body: 'Warren is in the house.',
+      term: {},
       relevance: -0.8106216455827525,
     },
   ]
@@ -64,7 +66,7 @@ test('query tweets', t => {
   t.end()
 })
 
-test('update a tweet', t => {
+test('01-one-document: update a tweet', t => {
   t.plan(6)
 
   const isUpdated1 = sl.upd('wrong-dataset', 'WarrenBuffett/329993701524918272', '', '')
@@ -82,6 +84,7 @@ test('update a tweet', t => {
     location: 'WarrenBuffett/329993701524918272',
     title: 'GONE',
     body: 'Not anymore!',
+    term: {},
     updates: 2,
   }
 
@@ -101,7 +104,7 @@ test('update a tweet', t => {
   t.end()
 })
 
-test('delete a tweet', t => {
+test('01-one-document: delete a tweet', t => {
   t.plan(3)
 
   const deleted1 = sl.del('tweet', 'WarrenBuffett/329993701524918272')
@@ -118,7 +121,7 @@ test('delete a tweet', t => {
   t.end()
 })
 
-test('count docs', t => {
+test('01-one-document: count docs', t => {
   t.plan(1)
 
   const count = sl.count('tweet')

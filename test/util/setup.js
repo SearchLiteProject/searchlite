@@ -31,3 +31,9 @@ export default function setup() {
 
   return { test, filename, db, sl }
 }
+
+export function insDocs(sl, docs) {
+  for ( const doc of docs ) {
+    sl.ins(...doc)
+  }
+}

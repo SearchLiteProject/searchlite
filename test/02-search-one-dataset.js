@@ -1,5 +1,5 @@
 // local
-import setup from './util/setup.js'
+import setup, { insDocs } from './util/setup.js'
 
 // setup
 const { test, filename, db, sl } = setup()
@@ -18,6 +18,7 @@ const expChicken = [
     title: 'Honey Soy Chicken',
     body: 'Lots of chicken, honey, and soy!',
     relevance: -0.0000019257294429708225,
+    term: {},
   },
   {
     id: 2,
@@ -26,8 +27,10 @@ const expChicken = [
     title: 'Chicken Drumsticks',
     body: 'Chicken drumsticks and things that go with it.',
     relevance: -0.0000019257294429708225,
+    term: {},
   },
 ]
+
 const expBeef = [
   {
     id: 3,
@@ -36,17 +39,17 @@ const expBeef = [
     title: 'Beef Wellington',
     body: 'Beef and some other stuff.',
     relevance: -1.007770116451384,
+    term: {},
   }
 ]
+
 const expFish = []
 
 // tests
-test('search recipes', t => {
+test('02-search-one-dataset: search recipes', t => {
   t.plan(3)
 
-  for ( const recipe of recipes ) {
-    sl.ins(...recipe)
-  }
+  insDocs(sl, recipes)
 
   const chicken = sl.search('recipe', 'chicken')
   t.deepEqual(chicken, expChicken, 'Expected chicken recipes')
@@ -60,7 +63,7 @@ test('search recipes', t => {
   t.end()
 })
 
-test('search cars', t => {
+test('02-search-one-dataset: search cars', t => {
   t.plan(1)
 
   const chicken = sl.search('car', 'chicken')

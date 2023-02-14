@@ -118,6 +118,39 @@ console.log()
   using only "location", "title", "body. e.g. "title", "description",
   "content", "profile", "whatever"
 
+## Goals and Non-Goals
+
+Goals:
+
+* a super simple way to fully index any content so you can search it with/from
+  JavaScript (Node.js) on the server
+* be able to cope with large numbers of documents
+* perform a free-text search on content
+* be able to filter on terms
+* be able to filter on (numeric, datetime) ranges
+* allow reasonably complex queries
+* use SQLite to be the power behind indexing and queries so we don't have to
+
+Non-Goals:
+
+* be the fastest search engine out there - we just need to be fast enough
+* distributed indexing/searching - we just need to be able to index and search
+* be the smallest search index - we just need to be small enough
+* the most powerful query parser - we just need powerful enough
+
+We proudly sit on top of SQLite and using all of it's power to our
+advantage. If you see any design changes that can help with any of the goals or
+non-goals we will always consider them assuming no loss of functionality.
+
+## Possible Improvements
+
+### Reverse Index / Posting List for Terms
+
+Instead of storing the terms as `term(doc_id, field, value)`, perhaps we want
+to store them as a reverse index such as `term(dataset, field, value,
+docIdsAsJsonArray)`. This means we only have one entry for `field, value` per
+dataset. This is the same as a "reverse index" or "posting list".
+
 ## Releases / Changelog
 
 * v0.1.0 - first release

@@ -11,6 +11,8 @@
 // DDL
 // See "External Content Tables" (https://www.sqlite.org/fts5.html)
 const ddlSql = `
+  PRAGMA foreign_keys = ON;
+
   CREATE TABLE IF NOT EXISTS
     doc(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,7 +53,20 @@ const ddlSql = `
     INSERT INTO ftsi(ftsi, rowid, location, title, body) VALUES('delete', old.id, old.location, old.title, old.body);
     INSERT INTO ftsi(rowid, location, title, body) VALUES (new.id, new.location, new.title, new.body);
   END;
+
+  CREATE TABLE IF NOT EXISTS
+    term(
+      doc_id INTEGER NOT NULL,
+      field TEXT NOT NULL,
+      value TEXT NOT NULL,
+
+      UNIQUE(doc_id, field, value),
+      FOREIGN KEY(doc_id) REFERENCES doc(id)
+    )
+  ;
 `
+
+// Docs
 const getDocSql = `SELECT * FROM doc WHERE dataset = ? AND location = ?`
 const insDocSql = `INSERT INTO doc(dataset, location, title, body, updates, inserted, updated) VALUES(?, ?, ?, ?, 1, strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now'))`
 const updDocSql = `UPDATE doc SET title = ?, body = ?, updates = updates + 1, updated = strftime('%Y-%m-%dT%H:%M:%S.%fZ', 'now') WHERE dataset = ? AND location = ?`
@@ -97,6 +112,11 @@ const searchSql = `
 `
 const countDocsSql = `SELECT count(*) AS count FROM doc WHERE dataset = ?`
 
+// Terms
+const insTermSql = `INSERT INTO term(doc_id, field, value) VALUES(?, ?, ?)`
+
+const getTermsForDocIdSql = `select json_group_array(field || ':' || value) AS terms from term JOIN doc ON doc.id = term.doc_id where doc.id = ?;`
+
 export default class SearchLite {
   constructor(db, debug) {
     this.db = db
@@ -113,6 +133,30 @@ export default class SearchLite {
     this.delDocStmt = this.db.prepare(delDocSql)
     this.searchStmt  = this.db.prepare(searchSql)
     this.countDocsStmt = this.db.prepare(countDocsSql)
+
+    this.insTermStmt = this.db.prepare(insTermSql)
+    this.getTermsForDocIdStmt = this.db.prepare(getTermsForDocIdSql)
+
+    this.insTrans = this.db.transaction((dataset, location, title, body, terms) => {
+      console.log('terms:', terms)
+      const info = this.insDocStmt.run(dataset, location, title, body)
+      this.log('ins()', 'info', info)
+
+      const docId = info.lastInsertRowid
+
+      // loop over all terms
+      // if ( terms ) {
+      for ( const [ field, values ] of Object.entries(terms) ) {
+        console.log(`${field}: ${values.join('|')}`)
+        for ( const value of values ) {
+          console.log(`${field}: ${value}`)
+          this.insTermStmt.run(docId, field, value)
+        }
+      }
+      // }
+
+      return docId
+    })
   }
 
   log(fn, name, obj) {
@@ -128,16 +172,29 @@ export default class SearchLite {
   get(dataset, location) {
     const row = this.getDocStmt.get(dataset, location)
     this.log('get()', 'row', row)
+    console.log('row:', row)
+
+    // const term = {}
+    const result = this.getTermsForDocIdStmt.get(row.id)
+    const terms = JSON.parse(result.terms)
+    row.term = {}
+    terms.forEach(t => {
+      const [ field, value ] = t.split(/:/)
+      row.term[field] = row.term[field] || []
+      row.term[field].push(value)
+    })
+
     return row
   }
 
-  ins(dataset, location, title, body) {
-    const info = this.insDocStmt.run(dataset, location, title, body)
-    this.log('ins()', 'info', info)
-    return info.lastInsertRowid
+  ins(dataset, location, title, body, terms = {}) {
+    return this.insTrans(dataset, location, title, body, terms)
+    // const info = this.insDocStmt.run(dataset, location, title, body)
+    // this.log('ins()', 'info', info)
+    // return info.lastInsertRowid
   }
 
-  upd(dataset, location, title, body) {
+  upd(dataset, location, title, body, terms) {
     const info = this.updDocStmt.run(title, body, dataset, location)
     this.log('upd()', 'info', info)
     return Boolean(info.changes)
@@ -161,6 +218,9 @@ export default class SearchLite {
       throw new Error(`SearchLite: search() - provide both 'dataset' and 'query'`)
     }
     const results = this.searchStmt.all(dataset, query)
+    for ( const result of results ) {
+      result.term = {}
+    }
     this.log(`search(${dataset}, ${query})`, 'results', results)
     return results
   }
