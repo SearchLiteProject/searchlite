@@ -30,7 +30,7 @@ const expChicken = [
   },
 ]
 
-test('03-terms: get one doc', t => {
+test('50-terms: get one doc', t => {
   t.plan(1)
 
   insDocs(sl, recipes)
@@ -59,7 +59,7 @@ test('03-terms: get one doc', t => {
   t.end()
 })
 
-test('03-terms: search recipes', t => {
+test('50-terms: search recipes', t => {
   t.plan(1)
 
   const chicken = sl.search('recipe', 'chicken')

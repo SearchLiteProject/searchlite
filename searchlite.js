@@ -36,7 +36,8 @@ const ddlSql = `
       body,
       location,
       content = doc, -- from the 'doc' table
-      content_rowid = 'id' -- use the 'doc.id' as the 'rowid'
+      content_rowid = 'id', -- use the 'doc.id' as the 'rowid',
+      tokenize = porter -- use the "porter" stemmer (https://www.sqlite.org/fts5.html#porter_tokenizer)
     )
   ;
 
