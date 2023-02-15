@@ -83,7 +83,7 @@ const ensDocSql = `
   ;
 `
 const delDocSql = `DELETE FROM doc WHERE dataset = ? AND location = ?`
-const searchSql = `
+const searchSqlSubTable = `
   SELECT
     doc.id,
     doc.dataset,
@@ -109,6 +109,22 @@ const searchSql = `
     ftsi MATCH ?
   ORDER BY
     relevance
+`
+const searchSql = `
+  SELECT
+    doc.*,
+    json_group_array(term.field || ':' || term.value) AS terms
+  FROM
+    (${searchSqlSubTable}) AS doc
+    LEFT JOIN term ON (doc.id = term.doc_id)
+  GROUP BY
+    doc.id,
+    doc.dataset,
+    doc.location,
+    doc.title,
+    doc.body,
+    doc.relevance
+  ;
 `
 const countDocsSql = `SELECT count(*) AS count FROM doc WHERE dataset = ?`
 
@@ -138,7 +154,6 @@ export default class SearchLite {
     this.getTermsForDocIdStmt = this.db.prepare(getTermsForDocIdSql)
 
     this.insTrans = this.db.transaction((dataset, location, title, body, terms) => {
-      console.log('terms:', terms)
       const info = this.insDocStmt.run(dataset, location, title, body)
       this.log('ins()', 'info', info)
 
@@ -147,9 +162,7 @@ export default class SearchLite {
       // loop over all terms
       // if ( terms ) {
       for ( const [ field, values ] of Object.entries(terms) ) {
-        console.log(`${field}: ${values.join('|')}`)
         for ( const value of values ) {
-          console.log(`${field}: ${value}`)
           this.insTermStmt.run(docId, field, value)
         }
       }
@@ -172,7 +185,9 @@ export default class SearchLite {
   get(dataset, location) {
     const row = this.getDocStmt.get(dataset, location)
     this.log('get()', 'row', row)
-    console.log('row:', row)
+    if ( !row ) {
+      return
+    }
 
     // const term = {}
     const result = this.getTermsForDocIdStmt.get(row.id)
@@ -217,17 +232,37 @@ export default class SearchLite {
     if ( !dataset || !query ) {
       throw new Error(`SearchLite: search() - provide both 'dataset' and 'query'`)
     }
+
     const results = this.searchStmt.all(dataset, query)
     for ( const result of results ) {
+      // make a place for the terms
       result.term = {}
+
+      // check if there are any terms for this doc
+      if ( result.terms === '[null]' ) {
+        // nothing more to do, not even worth a `JSON.parse()`
+        delete result.terms
+        continue;
+      }
+
+      // parse the JSON of the 'terms' field
+      const terms = JSON.parse(result.terms)
+      delete result.terms
+
+      // now loop over them all
+      terms.forEach(t => {
+        const [ field, value ] = t.split(/:/)
+        result.term[field] = result.term[field] || []
+        result.term[field].push(value)
+      })
     }
+
     this.log(`search(${dataset}, ${query})`, 'results', results)
     return results
   }
 
   count(dataset) {
     const row = this.countDocsStmt.get(dataset)
-    console.log('row:', row)
     return row.count
   }
 }

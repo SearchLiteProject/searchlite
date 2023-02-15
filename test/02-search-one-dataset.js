@@ -45,7 +45,6 @@ const expBeef = [
 
 const expFish = []
 
-// tests
 test('02-search-one-dataset: search recipes', t => {
   t.plan(3)
 

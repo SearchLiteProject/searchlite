@@ -52,10 +52,18 @@ test('03-terms: get one doc', t => {
   }
 
   const recipe1 = sl.get('recipe', 'honey-soy-chicken')
-  console.log('recipe1:', recipe1)
   delete recipe1.inserted
   delete recipe1.updated
   t.deepEqual(recipe1, exp, "Got a chicken recipe with multiple terms")
+
+  t.end()
+})
+
+test('03-terms: search recipes', t => {
+  t.plan(1)
+
+  const chicken = sl.search('recipe', 'chicken')
+  t.deepEqual(chicken, expChicken, 'Expected chicken recipes')
 
   t.end()
 })
