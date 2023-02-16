@@ -84,7 +84,7 @@ const ensDocSql = `
   ;
 `
 const delDocSql = `DELETE FROM doc WHERE dataset = ? AND location = ?`
-const searchSqlSubTable = `
+const searchSqlSubTableWithQuery = `
   SELECT
     doc.id,
     doc.dataset,
@@ -111,12 +111,45 @@ const searchSqlSubTable = `
   ORDER BY
     relevance
 `
-const searchSql = `
+const searchSqlSubTableNoQuery = `
+  SELECT
+    doc.id,
+    doc.dataset,
+    doc.location, -- rank 1 below
+    doc.title,    -- rank 5 below
+    doc.body,     -- rank 3 below
+    0 AS relevance
+
+  FROM
+    ftsi
+    JOIN doc ON (ftsi.rowid = doc.id)
+  WHERE
+    doc.dataset = ?
+  ORDER BY
+    doc.id
+`
+const searchWithQuerySql = `
   SELECT
     doc.*,
     json_group_array(term.field || ':' || term.value) AS terms
   FROM
-    (${searchSqlSubTable}) AS doc
+    (${searchSqlSubTableWithQuery}) AS doc
+    LEFT JOIN term ON (doc.id = term.doc_id)
+  GROUP BY
+    doc.id,
+    doc.dataset,
+    doc.location,
+    doc.title,
+    doc.body,
+    doc.relevance
+  ;
+`
+const searchNoQuerySql = `
+  SELECT
+    doc.*,
+    json_group_array(term.field || ':' || term.value) AS terms
+  FROM
+    (${searchSqlSubTableNoQuery}) AS doc
     LEFT JOIN term ON (doc.id = term.doc_id)
   GROUP BY
     doc.id,
@@ -148,7 +181,8 @@ export default class SearchLite {
     this.updDocStmt = this.db.prepare(updDocSql)
     this.ensDocStmt = this.db.prepare(ensDocSql)
     this.delDocStmt = this.db.prepare(delDocSql)
-    this.searchStmt  = this.db.prepare(searchSql)
+    this.searchWithQueryStmt  = this.db.prepare(searchWithQuerySql)
+    this.searchNoQueryStmt  = this.db.prepare(searchNoQuerySql)
     this.countDocsStmt = this.db.prepare(countDocsSql)
 
     this.insTermStmt = this.db.prepare(insTermSql)
@@ -230,11 +264,11 @@ export default class SearchLite {
   }
 
   search(dataset, query) {
-    if ( !dataset || !query ) {
-      throw new Error(`SearchLite: search() - provide both 'dataset' and 'query'`)
+    if ( !dataset ) {
+      throw new Error(`SearchLite: search() - provide a 'dataset'`)
     }
 
-    const results = this.searchStmt.all(dataset, query)
+    const results = query ? this.searchWithQueryStmt.all(dataset, query) : this.searchNoQueryStmt.all(dataset)
     for ( const result of results ) {
       // make a place for the terms
       result.term = {}

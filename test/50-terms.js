@@ -1,12 +1,12 @@
 // local
-import setup, { insDocs } from './util/setup.js'
+import setup, { insDocs, copy } from './util/setup.js'
 
 // setup
 const { test, filename, db, sl } = setup()
 
 const recipes = [
   [ 'recipe', 'chicken-drumsticks', 'Chicken Drumsticks', 'Chicken drumsticks and things that go with it.', { ingredient: [ 'chicken' ], cuisine: [ "american" ], difficulty: [ "easy" ], diet: [ "vegetarian" ] } ],
-  [ 'recipe', 'honey-soy-chicken', 'Honey Soy Chicken', 'Lots of chicken, honey, and soy!', { ingredient: [ 'chicken', 'honey' ], category: [ "appetiser", "desert", "dinner" ], cuisine: [ "chinese" ], difficulty: [ "easy" ], diet: [ "gluten-free" ] } ],
+  [ 'recipe', 'honey-soy-chicken', 'Honey Soy Chicken', 'Lots of chicken, honey, and soy!', { ingredient: [ 'chicken', 'honey' ], category: [ "appetiser", "desert", "dinner" ], cuisine: [ "chinese" ], difficulty: [ "hard" ], diet: [ "gluten-free" ] } ],
 ]
 
 const expChicken = [
@@ -41,13 +41,7 @@ test('50-terms: get one doc', t => {
     location: 'honey-soy-chicken',
     title: 'Honey Soy Chicken',
     body: 'Lots of chicken, honey, and soy!',
-    term: {
-      ingredient: [ 'chicken', 'honey' ],
-      category: [ "appetiser", "desert", "dinner" ],
-      cuisine: [ "chinese" ],
-      difficulty: [ "easy" ],
-      diet: [ "gluten-free" ],
-    },
+    term: recipes[1][4],
     updates: 1,
   }
 
@@ -64,6 +58,18 @@ test('50-terms: search recipes', t => {
 
   const chicken = sl.search('recipe', 'chicken')
   t.deepEqual(chicken, expChicken, 'Expected chicken recipes')
+
+  t.end()
+})
+
+test('50-terms: search with no query gives everything', t => {
+  t.plan(1)
+
+  const exp = copy(expChicken)
+  exp.forEach(r => r.relevance = 0)
+
+  const chicken = sl.search('recipe', '')
+  t.deepEqual(chicken, exp, 'Expected all recipes with 0 relevance')
 
   t.end()
 })

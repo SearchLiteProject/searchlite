@@ -6,7 +6,7 @@ const { test, filename, db, sl } = setup()
 
 // tests
 test('00-no-documents: just test nothingness', t => {
-  t.plan(5)
+  t.plan(6)
 
   const count1 = sl.count('whatever')
   t.equal(count1, 0, "No docs yet")
@@ -20,8 +20,11 @@ test('00-no-documents: just test nothingness', t => {
   const isDeleted = sl.del('empty', 'set')
   t.deepEqual(isDeleted, false, "Nothing Deleted")
 
-  const results = sl.search('the-void', 'query')
-  t.deepEqual(results, [], 'No expected results')
+  const withQuery = sl.search('the-void', 'query')
+  t.deepEqual(withQuery, [], 'No expected results')
+
+  const noQuery = sl.search('no-query')
+  t.deepEqual(noQuery, [], 'No expected results')
 
   t.end()
 })

@@ -37,3 +37,7 @@ export function insDocs(sl, docs) {
     sl.ins(...doc)
   }
 }
+
+export function copy(data) {
+  return JSON.parse(JSON.stringify(data))
+}

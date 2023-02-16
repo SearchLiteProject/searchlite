@@ -4,8 +4,14 @@ import setup from './util/setup.js'
 // setup
 const { test, filename, db, sl } = setup()
 
+const expAll = [
+  { dataset: 'tweet', location: 'jack/20', title: '', body: 'just setting up my twttr', term: {} },
+  { dataset: 'tweet', location: 'realDonaldTrump/869766994899468288', title: '', body: 'Despite the constant negative press covfefe', term: {} },
+  { dataset: 'tweet', location: 'WarrenBuffett/329993701524918272', title: '', body: 'Warren is in the house.', term: {} },
+]
+
 // tests
-test('01-one-document: small document inserts - tweets', t => {
+test('01-a-few-docs: small document inserts - tweets', t => {
   t.plan(5)
 
   const count1 = sl.count('tweet')
@@ -24,7 +30,7 @@ test('01-one-document: small document inserts - tweets', t => {
   t.end()
 })
 
-test('01-one-document: get a tweet', t => {
+test('01-a-few-docs: get a tweet', t => {
   t.plan(1)
 
   const exp = {
@@ -45,10 +51,10 @@ test('01-one-document: get a tweet', t => {
   t.end()
 })
 
-test('01-one-document: query tweets', t => {
-  t.plan(1)
+test('01-a-few-docs: search tweets', t => {
+  t.plan(2)
 
-  const exp = [
+  const expWarrensHouse = [
     {
       id: 3,
       dataset: 'tweet',
@@ -60,13 +66,23 @@ test('01-one-document: query tweets', t => {
     },
   ]
 
-  const results = sl.search('tweet', 'house')
-  t.deepEqual(results, exp, "Found Warren's Tweet")
+  const resultsHouse = sl.search('tweet', 'house')
+  t.deepEqual(resultsHouse, expWarrensHouse, "Found Warren's Tweet")
+
+  const resultsNoQuery = sl.search('tweet')
+  resultsNoQuery.forEach(tweet => {
+    delete tweet.id
+    delete tweet.updates
+    delete tweet.inserted
+    delete tweet.updated
+    delete tweet.relevance
+  })
+  t.deepEqual(resultsNoQuery, expAll, "All Tweets in Insertion Order")
 
   t.end()
 })
 
-test('01-one-document: update a tweet', t => {
+test('01-a-few-docs: update a tweet', t => {
   t.plan(6)
 
   const isUpdated1 = sl.upd('wrong-dataset', 'WarrenBuffett/329993701524918272', '', '')
@@ -104,7 +120,7 @@ test('01-one-document: update a tweet', t => {
   t.end()
 })
 
-test('01-one-document: delete a tweet', t => {
+test('01-a-few-docs: delete a tweet', t => {
   t.plan(3)
 
   const deleted1 = sl.del('tweet', 'WarrenBuffett/329993701524918272')
@@ -121,7 +137,7 @@ test('01-one-document: delete a tweet', t => {
   t.end()
 })
 
-test('01-one-document: count docs', t => {
+test('01-a-few-docs: count docs', t => {
   t.plan(1)
 
   const count = sl.count('tweet')
