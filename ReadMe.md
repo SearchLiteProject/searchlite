@@ -103,12 +103,107 @@ console.log('recipe / beef:', sl.search('recipe', 'beef'))
 console.log()
 ```
 
-## Roadmap
+## Terms
 
-* ability to add "terms" (i.e. key=value pairs) to each document. e.g. if you
-  were indexing an "email", you might have "from=bob@example.com" or multiple
-  "to=jane@example.com" and "to=dora@example.com". This allows you query on
-  such terms as well, such as "all emails from bob@example.com"
+When adding a document, you might want to add field/value (or multiple) pairs
+so you can both store them and match on them when searching.
+
+Remember that when we search, we must match all fields, but you can match any
+value in that field. Think of it like "AND" across fields, but "OR" within it.
+
+Example 1 - Recipes
+
+You could consider adding some of the following term field/values:
+
+* `{ cuisine: [ "chinese" ] }`
+* `{ cuisine: [ "french" ] }`
+* `{ ingredient: [ "chicken", "honey", "soy" ] }`
+* `{ diet: [ "vegetarian" ], ingredient: [ "lentil", "egg" ] }`
+* `{ cuisine: "french" }`
+
+To query for all French cuisine recipes:
+
+```
+  const results = sl.query('recipe', '', { cuisine: [ "french" ] })
+```
+
+To find all French recipes that contain at least one type of cheese:
+
+```
+  const results = sl.query('recipe', '', { cuisine: [ "french" ], cheese: [ "roquefort", "cancoillotte" ] })
+```
+
+To look for all French, German, and Italian recipes:
+
+```
+  const results = sl.query('recipe', '', { cuisine: [ "french", "german", "italian" ] })
+```
+
+But to look for any French, German and Italian recipe that are vegetarian or
+vegan, try this:
+
+```
+  const results = sl.query('recipe', '', { cuisine: [ "french", "german", "italian" ], diet: [ "vegetarian", "vegan" ] })
+```
+
+Example 2 - Emails
+
+When mining a dataset such as the Enron emails, then we know each email has a
+"From:" field. In any of the "To:", "Cc:", and "Bcc:" fields we may have zero,
+one, or multiple email addresses.
+
+```
+{
+  from: [
+    "jeff.skilling@enron.com"
+  ],
+  to: [
+   "greg.whalley@enron.com",
+   "greg.piper@enron.com"
+  ],
+  cc: [
+    "louise.kitchen@enron.com",
+    "mark.koenig@enron.com",
+	"kenneth.lay@enron.com",
+    "john.lavorato@enron.com",
+    "dan.leff@enron.com"
+  ]
+}
+```
+
+Here we are adding 3 fields where we have 1 value for "from", 2 for "to" and 5
+for "cc". We have no "bcc" in this email.
+
+To find all emails sent by someone, just try:
+
+```
+  const emails = sl.search('enron', '', { from: [ "jeff.skilling@enron.com" ] })
+```
+
+To find all emails sent by someone to a particular person:
+
+```
+  const emails = sl.search('enron', '', {
+    from: [ "jeff.skilling@enron.com" ],
+    to: [ "sherri.sera@enron.com" ],
+  })
+```
+
+Or all emails sent from someone to anyone in a specific group:
+
+```
+  const emails = sl.search('enron', '', {
+    from: [ "jeff.skilling@enron.com" ],
+    to: [
+      "sherri.sera@enron.com",
+      "jim.fallon@enron.com",
+      "louise.kitchen@enron.com",
+      "dan.leff@enron.com",
+    ]
+  })
+```
+
+## Roadmap
 
 * ability to add range values such as "quantity=26", "height=176" or
   "created=2023-02-10T01:26:33.554Z", so you can filter for such things as
