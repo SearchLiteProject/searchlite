@@ -153,6 +153,13 @@ dataset. This is the same as a "reverse index" or "posting list".
 
 ## Releases / Changelog
 
+* v0.2.0 - store and match on terms
+  * can now search with an empty query
+  * create a new table called 'term'
+  * stores the terms provided with each document
+  * matches all provided term/values
+  * returns the 'matched' property for the number of times each field matches
+
 * v0.1.0 - first release
   * creates the DB schema when instantiated with a `better-sqlite3` DB
   * ins/upd/ens/del documents with "dataset", "location", "title", "body"
