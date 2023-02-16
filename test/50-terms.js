@@ -75,13 +75,54 @@ test('50-terms: search recipes with a term', t => {
   const exp = copy(expChicken)
   clean(exp)
   exp[0].relevance = 0
+  exp[0].matched = { cuisine: 1 }
   exp[1].relevance = 0
+  exp[1].matched = { ingredient: 1 }
 
   const chicken1 = sl.search('recipe', '', { ingredient: [ 'honey' ] })
   t.deepEqual(chicken1, [ exp[1] ], 'Expected chicken recipe with honey')
 
   const chicken2 = sl.search('recipe', '', { cuisine: [ 'american' ] })
   t.deepEqual(chicken2, [ exp[0] ], 'Expected chicken recipe from US of A')
+
+  t.end()
+})
+
+test('50-terms: search recipes with multiple terms', t => {
+  t.plan(2)
+
+  const exp = copy(expChicken)
+  clean(exp)
+  exp[0].relevance = 0
+  exp[0].matched = { cuisine: 1, difficulty: 1 }
+  exp[1].relevance = 0
+  exp[1].matched = { ingredient: 1, category: 1, cuisine: 1, difficulty: 1 }
+
+  const chicken1 = sl.search('recipe', '', { ingredient: [ 'honey' ], category: [ "dinner" ], cuisine: [ "chinese" ], difficulty: [ "hard" ] })
+  t.deepEqual(chicken1, [ exp[1] ], 'Expected chicken recipe with honey')
+
+  const chicken2 = sl.search('recipe', '', { cuisine: [ 'american' ], difficulty: [ "easy" ] })
+  t.deepEqual(chicken2, [ exp[0] ], 'Expected chicken recipe from US of A')
+
+  t.end()
+})
+
+test('50-terms: search recipes with multiple term matches', t => {
+  t.plan(2)
+
+  const exp = copy(expChicken)
+  clean(exp)
+  exp[0].relevance = 0
+  exp[1].relevance = 0
+
+  const chicken1 = sl.search('recipe', '', { ingredient: [ 'chicken', 'honey' ] })
+  exp[0].matched = { ingredient: 1 }
+  exp[1].matched = { ingredient: 2 }
+  t.deepEqual(chicken1, exp, 'Expected chicken recipe with honey')
+
+  const chicken2 = sl.search('recipe', '', { ingredient: [ 'chicken', 'honey' ], cuisine: [ "chinese" ], category: [ "appetiser", "desert", "dinner" ] })
+  exp[1].matched = { ingredient: 2, cuisine: 1, category: 3 }
+  t.deepEqual(chicken2, [ exp[1] ], 'Expected chicken recipe matching multiple terms')
 
   t.end()
 })

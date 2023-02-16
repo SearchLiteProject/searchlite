@@ -296,38 +296,43 @@ export default class SearchLite {
     // time) we'll just loop over each result and make sure any `terms` was
     // want are present. We promise, this is just to pass the tests first! :)
     term = term || {}
-    const resultsWithExpectedTerms = []
+    const finalResults = []
     const numFieldsToMatch = Object.keys(term).length
-    for ( const result of results ) {
-      // For each field, we must have at least one value.
-      //
-      // e.g. if we want `{ cuisine: [ 'chinese' ], diet: [ 'vegetarian' ] }`
-      // we **must** have both.
-      //
-      // e.g. if we want `{ cuisine: [ 'chinese', 'italian' ] }`
-      // we **must** have either 'chinese' or 'italian'.
-      console.log('result.term:', result.term)
-      const matched = {}
-      for ( const [ field, values ] of Object.entries(term) ) {
-        console.log(`${field}:${values.join('+')}`)
-        for ( const value of values ) {
-          if ( field in result.term && result.term[field].includes(value) ) {
-            matched[field] = true
+    if ( numFieldsToMatch > 0 ) {
+      for ( const result of results ) {
+        // For each field, we must have at least one value.
+        //
+        // e.g. if we want `{ cuisine: [ 'chinese' ], diet: [ 'vegetarian' ] }`
+        // we **must** have both.
+        //
+        // e.g. if we want `{ cuisine: [ 'chinese', 'italian' ] }`
+        // we **must** have either 'chinese' or 'italian'.
+        // console.log('result.term:', result.term)
+        result.matched = {}
+        for ( const [ field, values ] of Object.entries(term) ) {
+          // console.log(`${field}:${values.join('+')}`)
+          for ( const value of values ) {
+            if ( field in result.term && result.term[field].includes(value) ) {
+              result.matched[field] = (result.matched[field] || 0) + 1
+            }
           }
         }
-      }
-      console.log('matched:', matched)
-      if ( numFieldsToMatch == Object.keys(matched).length ) {
-        console.log('matched all fields asked for')
-        resultsWithExpectedTerms.push(result)
-      }
-      else {
-        console.log("didn't match all fields")
+        // console.log('result.matched:', result.matched)
+        if ( numFieldsToMatch == Object.keys(result.matched).length ) {
+          // console.log('matched all fields asked for')
+          finalResults.push(result)
+        }
+        else {
+          // console.log("didn't match all fields")
+        }
       }
     }
+    else {
+      finalResults.push(...results)
+    }
 
-    this.log(`search(${dataset}, ${query})`, 'resultsWithExpectedTerms:', resultsWithExpectedTerms)
-    return resultsWithExpectedTerms
+    this.log(`search(${dataset}, ${query})`, 'finalResults:', finalResults)
+    return finalResults
   }
 
   count(dataset) {
