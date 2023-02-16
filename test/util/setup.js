@@ -41,3 +41,13 @@ export function insDocs(sl, docs) {
 export function copy(data) {
   return JSON.parse(JSON.stringify(data))
 }
+
+export function clean(results) {
+  for ( const res of results ) {
+    // delete res.id
+    delete res.relevance
+    delete res.updates
+    delete res.inserted
+    delete res.updated
+  }
+}
